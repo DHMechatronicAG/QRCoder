@@ -15534,24 +15534,23 @@
     "UAP,Version=v10.0.10240": []
   },
   "packageFolders": {
-    "C:\\Users\\kevin.gardthausen\\.nuget\\packages\\": {},
+    "C:\\Users\\netbl\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "restore": {
-      "projectUniqueName": "C:\\Data\\Development\\D+H\\Repositories\\dotnet 2\\External\\QRCoder\\QRCoderDemoUWP\\QRCoderDemoUWP.csproj",
+      "projectUniqueName": "C:\\Users\\netbl\\Documents\\GitHub\\QRCoder\\QRCoderDemoUWP\\QRCoderDemoUWP.csproj",
       "projectName": "QRCoderDemoUWP",
-      "projectPath": "C:\\Data\\Development\\D+H\\Repositories\\dotnet 2\\External\\QRCoder\\QRCoderDemoUWP\\QRCoderDemoUWP.csproj",
-      "projectJsonPath": "C:\\Data\\Development\\D+H\\Repositories\\dotnet 2\\External\\QRCoder\\QRCoderDemoUWP\\project.json",
-      "packagesPath": "C:\\Users\\kevin.gardthausen\\.nuget\\packages\\",
-      "outputPath": "C:\\Data\\Development\\D+H\\Repositories\\dotnet 2\\External\\QRCoder\\QRCoderDemoUWP\\obj\\",
+      "projectPath": "C:\\Users\\netbl\\Documents\\GitHub\\QRCoder\\QRCoderDemoUWP\\QRCoderDemoUWP.csproj",
+      "projectJsonPath": "C:\\Users\\netbl\\Documents\\GitHub\\QRCoder\\QRCoderDemoUWP\\project.json",
+      "packagesPath": "C:\\Users\\netbl\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\netbl\\Documents\\GitHub\\QRCoder\\QRCoderDemoUWP\\obj\\",
       "projectStyle": "ProjectJson",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Data\\Development\\D+H\\Repositories\\dotnet 2\\NuGet.Config",
-        "C:\\Users\\kevin.gardthausen\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\netbl\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
