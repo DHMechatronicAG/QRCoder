@@ -1,76 +1,121 @@
-﻿using Xunit;
 using QRCoder;
 using Shouldly;
-using QRCoderTests.Helpers.XUnitExtenstions;
+using Xunit;
 
 
-namespace QRCoderTests
+namespace QRCoderTests;
+
+
+public class AsciiQRCodeRendererTests
 {
 
-    public class AsciiQRCodeRendererTests
-    {                        
+    [Fact]
+    public void can_render_ascii_qrcode()
+    {
+        var targetCode = "                                                          \n                                                          \n                                                          \n                                                          \n        ██████████████  ████  ██    ██████████████        \n        ██          ██  ████    ██  ██          ██        \n        ██  ██████  ██  ██  ██  ██  ██  ██████  ██        \n        ██  ██████  ██  ██      ██  ██  ██████  ██        \n        ██  ██████  ██  ██████████  ██  ██████  ██        \n        ██          ██              ██          ██        \n        ██████████████  ██  ██  ██  ██████████████        \n                        ██████████                        \n          ████  ██  ████    ██████  ██  ██████████        \n        ██        ██        ██      ██    ██  ████        \n            ████  ██████  ██████        ██████  ██        \n        ████      ██  ██████  ██    ██        ██          \n          ████    ████  ██  ██      ██  ██  ████          \n                        ██    ██  ██  ██  ██              \n        ██████████████  ██  ████  ██████    ██            \n        ██          ██    ██    ████  ██████              \n        ██  ██████  ██  ██████  ████████    ██  ██        \n        ██  ██████  ██    ██        ██      ████          \n        ██  ██████  ██  ██████  ██      ██      ██        \n        ██          ██  ██  ██      ██      ██████        \n        ██████████████    ██    ██  ██  ██  ██  ██        \n                                                          \n                                                          \n                                                          \n                                                          ";
 
-        [Fact]
-        [Category("QRRenderer/AsciiQRCode")]
-        public void can_render_ascii_qrcode()
-        {
-            var targetCode = "                                                          \n                                                          \n                                                          \n                                                          \n        ██████████████    ██  ██    ██████████████        \n        ██          ██  ██    ████  ██          ██        \n        ██  ██████  ██  ██  ██  ██  ██  ██████  ██        \n        ██  ██████  ██      ██      ██  ██████  ██        \n        ██  ██████  ██  ██          ██  ██████  ██        \n        ██          ██    ████████  ██          ██        \n        ██████████████  ██  ██  ██  ██████████████        \n                        ██  ████                          \n        ██████████  ████      ████████  ██  ████          \n        ████    ██    ██    ████      ████████  ██        \n            ██  ██  ██████████  ██  ██  ██  ████          \n        ██      ██    ████  ████  ████                    \n          ████████  ██████            ████  ██  ██        \n                                  ████████                \n        ██████████████  ████  ████  ██  ████  ████        \n        ██          ██            ████████                \n        ██  ██████  ██  ██  ██  ██    ██    ██  ██        \n        ██  ██████  ██  ██████    ██  ██                  \n        ██  ██████  ██  ██  ██  ██  ██  ████  ████        \n        ██          ██  ████  ████        ██  ██          \n        ██████████████  ██████          ██  ██████        \n                                                          \n                                                          \n                                                          \n                                                          ";
+        //Create QR code
+        var gen = new QRCodeGenerator();
+        var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
+        var asciiCode = new AsciiQRCode(data).GetGraphic(1);
 
-            //Create QR code
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
-            var asciiCode = new AsciiQRCode(data).GetGraphic(1);
+        asciiCode.ShouldBe(targetCode);
+    }
 
-            asciiCode.ShouldBe(targetCode);
-        }
+    [Fact]
+    public void can_render_small_ascii_qrcode()
+    {
+        var targetCode = "█████████████████████████████\n█████████████████████████████\n████ ▄▄▄▄▄ █▀▄█ ▀█ ▄▄▄▄▄ ████\n████ █   █ █▄█ █▄█ █   █ ████\n████ █▄▄▄█ █▄▀▀▀▀█ █▄▄▄█ ████\n████▄▄▄▄▄▄▄█ █ ▀▄█▄▄▄▄▄▄▄████\n████  ▄▄ █▄ ██▀ ▄▄▄▀ ▀ ▄▀████\n████▀█▄█ █▄  ▄ ▀▄▀ █▄█▄▄█████\n█████▄▄▄▄█▄▄▄████▀▀  █▄█▄████\n████ ▄▄▄▄▄ █▄▄█▄▄▀ ▀ ▄█▄▄████\n████ █   █ █ ▀ █▄▀█ ██▄█▄████\n████ █▄▄▄█ █ ▀▄▀ █▄█▄ █ ▄████\n████▄▄▄▄▄▄▄█▄▄▄█████▄█▄▄▄████\n█████████████████████████████\n▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀";
 
-        [Fact]
-        [Category("QRRenderer/AsciiQRCode")]
-        public void can_render_ascii_qrcode_without_quietzones()
-        {
-            var targetCode = "██████████████    ██  ██    ██████████████\n██          ██  ██    ████  ██          ██\n██  ██████  ██  ██  ██  ██  ██  ██████  ██\n██  ██████  ██      ██      ██  ██████  ██\n██  ██████  ██  ██          ██  ██████  ██\n██          ██    ████████  ██          ██\n██████████████  ██  ██  ██  ██████████████\n                ██  ████                  \n██████████  ████      ████████  ██  ████  \n████    ██    ██    ████      ████████  ██\n    ██  ██  ██████████  ██  ██  ██  ████  \n██      ██    ████  ████  ████            \n  ████████  ██████            ████  ██  ██\n                          ████████        \n██████████████  ████  ████  ██  ████  ████\n██          ██            ████████        \n██  ██████  ██  ██  ██  ██    ██    ██  ██\n██  ██████  ██  ██████    ██  ██          \n██  ██████  ██  ██  ██  ██  ██  ████  ████\n██          ██  ████  ████        ██  ██  \n██████████████  ██████          ██  ██████";
+        //Create QR code
+        var gen = new QRCodeGenerator();
+        var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
+        var asciiCode = new AsciiQRCode(data).GetGraphicSmall();
 
-            //Create QR code
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
-            var asciiCode = new AsciiQRCode(data).GetGraphic(1, drawQuietZones : false);
+        asciiCode.ShouldBe(targetCode);
+    }
 
-            asciiCode.ShouldBe(targetCode);
-        }
+    [Fact]
+    public void can_render_small_ascii_qrcode_without_quietzones()
+    {
+        var targetCode = " ▄▄▄▄▄ █▀▄█ ▀█ ▄▄▄▄▄ \n █   █ █▄█ █▄█ █   █ \n █▄▄▄█ █▄▀▀▀▀█ █▄▄▄█ \n▄▄▄▄▄▄▄█ █ ▀▄█▄▄▄▄▄▄▄\n  ▄▄ █▄ ██▀ ▄▄▄▀ ▀ ▄▀\n▀█▄█ █▄  ▄ ▀▄▀ █▄█▄▄█\n█▄▄▄▄█▄▄▄████▀▀  █▄█▄\n ▄▄▄▄▄ █▄▄█▄▄▀ ▀ ▄█▄▄\n █   █ █ ▀ █▄▀█ ██▄█▄\n █▄▄▄█ █ ▀▄▀ █▄█▄ █ ▄\n▄▄▄▄▄▄▄█▄▄▄█████▄█▄▄▄";
 
-        [Fact]
-        [Category("QRRenderer/AsciiQRCode")]
-        public void can_render_ascii_qrcode_with_custom_symbols()
-        {
-            var targetCode = "                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n        XXXXXXXXXXXXXX        XXXX  XXXXXXXXXXXXXX        \n        XXXXXXXXXXXXXX        XXXX  XXXXXXXXXXXXXX        \n        XX          XX  XXXXXX  XX  XX          XX        \n        XX          XX  XXXXXX  XX  XX          XX        \n        XX  XXXXXX  XX    XXXXXXXX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XXXXXXXX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XXXX      XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XXXX      XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XX    XX    XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XX    XX    XX  XXXXXX  XX        \n        XX          XX    XX        XX          XX        \n        XX          XX    XX        XX          XX        \n        XXXXXXXXXXXXXX  XX  XX  XX  XXXXXXXXXXXXXX        \n        XXXXXXXXXXXXXX  XX  XX  XX  XXXXXXXXXXXXXX        \n                          XXXXXXXX                        \n                          XXXXXXXX                        \n            XX  XXXXXX  XXXXXX    XX    XX    XX          \n            XX  XXXXXX  XXXXXX    XX    XX    XX          \n        XX  XXXXXX    XXXX  XXXXXXXX    XXXXXX  XX        \n        XX  XXXXXX    XXXX  XXXXXXXX    XXXXXX  XX        \n                    XX  XX  XX    XX    XX  XX            \n                    XX  XX  XX    XX    XX  XX            \n          XX          XX        XX  XX  XXXXXX            \n          XX          XX        XX  XX  XXXXXX            \n          XX  XXXXXXXX  XXXX  XX    XXXXXXXX    XX        \n          XX  XXXXXXXX  XXXX  XX    XXXXXXXX    XX        \n                        XX    XXXXXXXX        XXXX        \n                        XX    XXXXXXXX        XXXX        \n        XXXXXXXXXXXXXX      XXXXXXXX    XX  XXXXXX        \n        XXXXXXXXXXXXXX      XXXXXXXX    XX  XXXXXX        \n        XX          XX  XXXXXX        XXXXXXXX            \n        XX          XX  XXXXXX        XXXXXXXX            \n        XX  XXXXXX  XX  XX  XXXX        XX  XXXX          \n        XX  XXXXXX  XX  XX  XXXX        XX  XXXX          \n        XX  XXXXXX  XX    XXXX        XXXXXXXX            \n        XX  XXXXXX  XX    XXXX        XXXXXXXX            \n        XX  XXXXXX  XX  XX  XXXXXXXX    XX  XXXXXX        \n        XX  XXXXXX  XX  XX  XXXXXXXX    XX  XXXXXX        \n        XX          XX    XX            XXXX    XX        \n        XX          XX    XX            XXXX    XX        \n        XXXXXXXXXXXXXX    XX    XXXXXX  XXXX  XXXX        \n        XXXXXXXXXXXXXX    XX    XXXXXX  XXXX  XXXX        \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          ";
+        //Create QR code
+        var gen = new QRCodeGenerator();
+        var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
+        var asciiCode = new AsciiQRCode(data).GetGraphicSmall(drawQuietZones: false);
 
-            //Create QR code
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("A", QRCodeGenerator.ECCLevel.Q);
-            var asciiCode = new AsciiQRCode(data).GetGraphic(2, "X", " ");
+        asciiCode.ShouldBe(targetCode);
+    }
 
-            asciiCode.ShouldBe(targetCode);
-        }
+    [Fact]
+    public void can_render_small_ascii_qrcode_inverted()
+    {
+        var targetCode = "                             \n                             \n    █▀▀▀▀▀█ ▄▀ █▄ █▀▀▀▀▀█    \n    █ ███ █ ▀ █ ▀ █ ███ █    \n    █ ▀▀▀ █ ▀▄▄▄▄ █ ▀▀▀ █    \n    ▀▀▀▀▀▀▀ █ █▄▀ ▀▀▀▀▀▀▀    \n    ██▀▀█ ▀█  ▄█▀▀▀▄█▄█▀▄    \n    ▄ ▀ █ ▀██▀█▄▀▄█ ▀ ▀▀     \n     ▀▀▀▀ ▀▀▀    ▄▄██ ▀ ▀    \n    █▀▀▀▀▀█ ▀▀ ▀▀▄█▄█▀ ▀▀    \n    █ ███ █ █▄█ ▀▄ █  ▀ ▀    \n    █ ▀▀▀ █ █▄▀▄█ ▀ ▀█ █▀    \n    ▀▀▀▀▀▀▀ ▀▀▀     ▀ ▀▀▀    \n                             \n                             ";
 
-        [Fact]
-        [Category("QRRenderer/AsciiQRCode")]
-        public void can_instantate_parameterless()
-        {
-            var asciiCode = new AsciiQRCode();
-            asciiCode.ShouldNotBeNull();
-            asciiCode.ShouldBeOfType<AsciiQRCode>();
-        }
+        //Create QR code
+        var gen = new QRCodeGenerator();
+        var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
+        var asciiCode = new AsciiQRCode(data).GetGraphicSmall(invert: true);
 
-        [Fact]
-        [Category("QRRenderer/AsciiQRCode")]
-        public void can_render_ascii_qrcode_from_helper()
-        {
-            var targetCode = "                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n        XXXXXXXXXXXXXX        XXXX  XXXXXXXXXXXXXX        \n        XXXXXXXXXXXXXX        XXXX  XXXXXXXXXXXXXX        \n        XX          XX  XXXXXX  XX  XX          XX        \n        XX          XX  XXXXXX  XX  XX          XX        \n        XX  XXXXXX  XX    XXXXXXXX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XXXXXXXX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XXXX      XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XXXX      XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XX    XX    XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XX    XX    XX  XXXXXX  XX        \n        XX          XX    XX        XX          XX        \n        XX          XX    XX        XX          XX        \n        XXXXXXXXXXXXXX  XX  XX  XX  XXXXXXXXXXXXXX        \n        XXXXXXXXXXXXXX  XX  XX  XX  XXXXXXXXXXXXXX        \n                          XXXXXXXX                        \n                          XXXXXXXX                        \n            XX  XXXXXX  XXXXXX    XX    XX    XX          \n            XX  XXXXXX  XXXXXX    XX    XX    XX          \n        XX  XXXXXX    XXXX  XXXXXXXX    XXXXXX  XX        \n        XX  XXXXXX    XXXX  XXXXXXXX    XXXXXX  XX        \n                    XX  XX  XX    XX    XX  XX            \n                    XX  XX  XX    XX    XX  XX            \n          XX          XX        XX  XX  XXXXXX            \n          XX          XX        XX  XX  XXXXXX            \n          XX  XXXXXXXX  XXXX  XX    XXXXXXXX    XX        \n          XX  XXXXXXXX  XXXX  XX    XXXXXXXX    XX        \n                        XX    XXXXXXXX        XXXX        \n                        XX    XXXXXXXX        XXXX        \n        XXXXXXXXXXXXXX      XXXXXXXX    XX  XXXXXX        \n        XXXXXXXXXXXXXX      XXXXXXXX    XX  XXXXXX        \n        XX          XX  XXXXXX        XXXXXXXX            \n        XX          XX  XXXXXX        XXXXXXXX            \n        XX  XXXXXX  XX  XX  XXXX        XX  XXXX          \n        XX  XXXXXX  XX  XX  XXXX        XX  XXXX          \n        XX  XXXXXX  XX    XXXX        XXXXXXXX            \n        XX  XXXXXX  XX    XXXX        XXXXXXXX            \n        XX  XXXXXX  XX  XX  XXXXXXXX    XX  XXXXXX        \n        XX  XXXXXX  XX  XX  XXXXXXXX    XX  XXXXXX        \n        XX          XX    XX            XXXX    XX        \n        XX          XX    XX            XXXX    XX        \n        XXXXXXXXXXXXXX    XX    XXXXXX  XXXX  XXXX        \n        XXXXXXXXXXXXXX    XX    XXXXXX  XXXX  XXXX        \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          ";
+        asciiCode.ShouldBe(targetCode);
+    }
 
-            //Create QR code                   
-            var asciiCode = AsciiQRCodeHelper.GetQRCode("A", 2, "X", " ", QRCodeGenerator.ECCLevel.Q);
-            asciiCode.ShouldBe(targetCode);
-        }
+    [Fact]
+    public void can_render_small_ascii_qrcode_with_custom_eol()
+    {
+        var targetCode = "█████████████████████████████\r\n█████████████████████████████\r\n████ ▄▄▄▄▄ █▀▄█ ▀█ ▄▄▄▄▄ ████\r\n████ █   █ █▄█ █▄█ █   █ ████\r\n████ █▄▄▄█ █▄▀▀▀▀█ █▄▄▄█ ████\r\n████▄▄▄▄▄▄▄█ █ ▀▄█▄▄▄▄▄▄▄████\r\n████  ▄▄ █▄ ██▀ ▄▄▄▀ ▀ ▄▀████\r\n████▀█▄█ █▄  ▄ ▀▄▀ █▄█▄▄█████\r\n█████▄▄▄▄█▄▄▄████▀▀  █▄█▄████\r\n████ ▄▄▄▄▄ █▄▄█▄▄▀ ▀ ▄█▄▄████\r\n████ █   █ █ ▀ █▄▀█ ██▄█▄████\r\n████ █▄▄▄█ █ ▀▄▀ █▄█▄ █ ▄████\r\n████▄▄▄▄▄▄▄█▄▄▄█████▄█▄▄▄████\r\n█████████████████████████████\r\n▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀";
+
+        //Create QR code
+        var gen = new QRCodeGenerator();
+        var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
+        var asciiCode = new AsciiQRCode(data).GetGraphicSmall(endOfLine: "\r\n");
+
+        asciiCode.ShouldBe(targetCode);
+    }
+
+    [Fact]
+    public void can_render_ascii_qrcode_without_quietzones()
+    {
+        var targetCode = "██████████████  ████  ██    ██████████████\n██          ██  ████    ██  ██          ██\n██  ██████  ██  ██  ██  ██  ██  ██████  ██\n██  ██████  ██  ██      ██  ██  ██████  ██\n██  ██████  ██  ██████████  ██  ██████  ██\n██          ██              ██          ██\n██████████████  ██  ██  ██  ██████████████\n                ██████████                \n  ████  ██  ████    ██████  ██  ██████████\n██        ██        ██      ██    ██  ████\n    ████  ██████  ██████        ██████  ██\n████      ██  ██████  ██    ██        ██  \n  ████    ████  ██  ██      ██  ██  ████  \n                ██    ██  ██  ██  ██      \n██████████████  ██  ████  ██████    ██    \n██          ██    ██    ████  ██████      \n██  ██████  ██  ██████  ████████    ██  ██\n██  ██████  ██    ██        ██      ████  \n██  ██████  ██  ██████  ██      ██      ██\n██          ██  ██  ██      ██      ██████\n██████████████    ██    ██  ██  ██  ██  ██";
+
+        //Create QR code
+        var gen = new QRCodeGenerator();
+        var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
+        var asciiCode = new AsciiQRCode(data).GetGraphic(1, drawQuietZones: false);
+
+        asciiCode.ShouldBe(targetCode);
+    }
+
+    [Fact]
+    public void can_render_ascii_qrcode_with_custom_symbols()
+    {
+        var targetCode = "                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n        XXXXXXXXXXXXXX    XX        XXXXXXXXXXXXXX        \n        XXXXXXXXXXXXXX    XX        XXXXXXXXXXXXXX        \n        XX          XX        XXXX  XX          XX        \n        XX          XX        XXXX  XX          XX        \n        XX  XXXXXX  XX  XXXX        XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XXXX        XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XX    XX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XX    XX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XXXX    XX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XXXX    XX  XX  XXXXXX  XX        \n        XX          XX  XX      XX  XX          XX        \n        XX          XX  XX      XX  XX          XX        \n        XXXXXXXXXXXXXX  XX  XX  XX  XXXXXXXXXXXXXX        \n        XXXXXXXXXXXXXX  XX  XX  XX  XXXXXXXXXXXXXX        \n                          XX  XX                          \n                          XX  XX                          \n          XX    XX  XX  XXXXXX  XXXX  XXXX  XX            \n          XX    XX  XX  XXXXXX  XXXX  XXXX  XX            \n          XXXXXX  XX  XXXX      XX    XX  XX  XXXX        \n          XXXXXX  XX  XXXX      XX    XX  XX  XXXX        \n          XXXXXX    XXXXXXXXXX      XXXXXXXXXX            \n          XXXXXX    XXXXXXXXXX      XXXXXXXXXX            \n        XX  XX  XX    XX  XX    XXXXXX  XX  XX            \n        XX  XX  XX    XX  XX    XXXXXX  XX  XX            \n        XXXXXX      XXXX  XX  XX  XXXX      XX  XX        \n        XXXXXX      XXXX  XX  XX  XXXX      XX  XX        \n                        XXXXXX    XXXX      XX  XX        \n                        XXXXXX    XXXX      XX  XX        \n        XXXXXXXXXXXXXX        XXXXXX            XX        \n        XXXXXXXXXXXXXX        XXXXXX            XX        \n        XX          XX          XX    XX  XX              \n        XX          XX          XX    XX  XX              \n        XX  XXXXXX  XX  XXXXXXXXXX  XXXXXXXXXXXXXX        \n        XX  XXXXXX  XX  XXXXXXXXXX  XXXXXXXXXXXXXX        \n        XX  XXXXXX  XX    XX  XXXX    XX  XX  XXXX        \n        XX  XXXXXX  XX    XX  XXXX    XX  XX  XXXX        \n        XX  XXXXXX  XX    XXXXXX    XXXXXXXXXX            \n        XX  XXXXXX  XX    XXXXXX    XXXXXXXXXX            \n        XX          XX  XX        XXXX  XX  XX  XX        \n        XX          XX  XX        XXXX  XX  XX  XX        \n        XXXXXXXXXXXXXX    XX    XXXXXX      XXXXXX        \n        XXXXXXXXXXXXXX    XX    XXXXXX      XXXXXX        \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          ";
+
+        //Create QR code
+        var gen = new QRCodeGenerator();
+        var data = gen.CreateQrCode("A", QRCodeGenerator.ECCLevel.Q);
+        var asciiCode = new AsciiQRCode(data).GetGraphic(2, "X", " ");
+
+        asciiCode.ShouldBe(targetCode);
+    }
+
+    [Fact]
+    public void can_instantate_parameterless()
+    {
+        var asciiCode = new AsciiQRCode();
+        asciiCode.ShouldNotBeNull();
+        asciiCode.ShouldBeOfType<AsciiQRCode>();
+    }
+
+    [Fact]
+    public void can_render_ascii_qrcode_from_helper()
+    {
+        var targetCode = "                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n        XXXXXXXXXXXXXX    XX        XXXXXXXXXXXXXX        \n        XXXXXXXXXXXXXX    XX        XXXXXXXXXXXXXX        \n        XX          XX        XXXX  XX          XX        \n        XX          XX        XXXX  XX          XX        \n        XX  XXXXXX  XX  XXXX        XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XXXX        XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XX    XX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX    XX    XX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XXXX    XX  XX  XXXXXX  XX        \n        XX  XXXXXX  XX  XXXX    XX  XX  XXXXXX  XX        \n        XX          XX  XX      XX  XX          XX        \n        XX          XX  XX      XX  XX          XX        \n        XXXXXXXXXXXXXX  XX  XX  XX  XXXXXXXXXXXXXX        \n        XXXXXXXXXXXXXX  XX  XX  XX  XXXXXXXXXXXXXX        \n                          XX  XX                          \n                          XX  XX                          \n          XX    XX  XX  XXXXXX  XXXX  XXXX  XX            \n          XX    XX  XX  XXXXXX  XXXX  XXXX  XX            \n          XXXXXX  XX  XXXX      XX    XX  XX  XXXX        \n          XXXXXX  XX  XXXX      XX    XX  XX  XXXX        \n          XXXXXX    XXXXXXXXXX      XXXXXXXXXX            \n          XXXXXX    XXXXXXXXXX      XXXXXXXXXX            \n        XX  XX  XX    XX  XX    XXXXXX  XX  XX            \n        XX  XX  XX    XX  XX    XXXXXX  XX  XX            \n        XXXXXX      XXXX  XX  XX  XXXX      XX  XX        \n        XXXXXX      XXXX  XX  XX  XXXX      XX  XX        \n                        XXXXXX    XXXX      XX  XX        \n                        XXXXXX    XXXX      XX  XX        \n        XXXXXXXXXXXXXX        XXXXXX            XX        \n        XXXXXXXXXXXXXX        XXXXXX            XX        \n        XX          XX          XX    XX  XX              \n        XX          XX          XX    XX  XX              \n        XX  XXXXXX  XX  XXXXXXXXXX  XXXXXXXXXXXXXX        \n        XX  XXXXXX  XX  XXXXXXXXXX  XXXXXXXXXXXXXX        \n        XX  XXXXXX  XX    XX  XXXX    XX  XX  XXXX        \n        XX  XXXXXX  XX    XX  XXXX    XX  XX  XXXX        \n        XX  XXXXXX  XX    XXXXXX    XXXXXXXXXX            \n        XX  XXXXXX  XX    XXXXXX    XXXXXXXXXX            \n        XX          XX  XX        XXXX  XX  XX  XX        \n        XX          XX  XX        XXXX  XX  XX  XX        \n        XXXXXXXXXXXXXX    XX    XXXXXX      XXXXXX        \n        XXXXXXXXXXXXXX    XX    XXXXXX      XXXXXX        \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          \n                                                          ";
+
+        //Create QR code                   
+        var asciiCode = AsciiQRCodeHelper.GetQRCode("A", 2, "X", " ", QRCodeGenerator.ECCLevel.Q);
+        asciiCode.ShouldBe(targetCode);
     }
 }
 
