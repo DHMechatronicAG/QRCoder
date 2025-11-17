@@ -1,17 +1,16 @@
 #if SYSTEM_DRAWING
-using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using static QRCoder.QRCodeGenerator;
 
 namespace QRCoder;
 
-#if NET6_0_OR_GREATER
-[System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
 /// <summary>
 /// Represents a QR code generator that outputs QR codes as bitmap images.
 /// </summary>
+#if NET6_0_OR_GREATER
+[System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
 public class QRCode : AbstractQRCode, IDisposable
 {
     /// <summary>
@@ -54,37 +53,7 @@ public class QRCode : AbstractQRCode, IDisposable
     /// <param name="drawQuietZones">Indicates if quiet zones around the QR code should be drawn.</param>
     /// <returns>Returns the QR code graphic as a bitmap.</returns>
     public Bitmap GetGraphic(int pixelsPerModule, Color darkColor, Color lightColor, bool drawQuietZones = true)
-    {
-        var size = (QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
-        var offset = drawQuietZones ? 0 : 4 * pixelsPerModule;
-
-        var bmp = new Bitmap(size, size);
-        using (var gfx = Graphics.FromImage(bmp))
-        using (var lightBrush = new SolidBrush(lightColor))
-        using (var darkBrush = new SolidBrush(darkColor))
-        {
-            for (var x = 0; x < size + offset; x += pixelsPerModule)
-            {
-                for (var y = 0; y < size + offset; y += pixelsPerModule)
-                {
-                    var module = QrCodeData.ModuleMatrix[(y + pixelsPerModule) / pixelsPerModule - 1][(x + pixelsPerModule) / pixelsPerModule - 1];
-
-                    if (module)
-                    {
-                        gfx.FillRectangle(darkBrush, new Rectangle(x - offset, y - offset, pixelsPerModule, pixelsPerModule));
-                    }
-                    else
-                    {
-                        gfx.FillRectangle(lightBrush, new Rectangle(x - offset, y - offset, pixelsPerModule, pixelsPerModule));
-                    }
-                }
-            }
-
-            gfx.Save();
-        }
-
-        return bmp;
-    }
+        => GetGraphic(pixelsPerModule, darkColor, lightColor, null, 0, 0, drawQuietZones, null);
 
     /// <summary>
     /// Creates a colored bitmap image of the QR code with an optional icon in the center.
@@ -111,20 +80,24 @@ public class QRCode : AbstractQRCode, IDisposable
         {
             gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
             gfx.CompositingQuality = CompositingQuality.HighQuality;
+            gfx.CompositingMode = CompositingMode.SourceCopy;
+
+            // Fill background with light color
             gfx.Clear(lightColor);
+
             var drawIconFlag = icon != null && iconSizePercent > 0 && iconSizePercent <= 100;
 
-            for (var x = 0; x < size + offset; x += pixelsPerModule)
+            // Create path for all dark modules using RLE
+            using (var darkPath = CreatePathFromModules(pixelsPerModule, offset, drawQuietZones))
             {
-                for (var y = 0; y < size + offset; y += pixelsPerModule)
-                {
-                    var moduleBrush = QrCodeData.ModuleMatrix[(y + pixelsPerModule) / pixelsPerModule - 1][(x + pixelsPerModule) / pixelsPerModule - 1] ? darkBrush : lightBrush;
-                    gfx.FillRectangle(moduleBrush, new Rectangle(x - offset, y - offset, pixelsPerModule, pixelsPerModule));
-                }
+                gfx.FillPath(darkBrush, darkPath);
             }
 
             if (drawIconFlag)
             {
+                // Set compositing mode to SourceOver for icon rendering
+                gfx.CompositingMode = CompositingMode.SourceOver;
+
                 float iconDestWidth = iconSizePercent * bmp.Width / 100f;
                 float iconDestHeight = drawIconFlag ? iconDestWidth * icon!.Height / icon.Width : 0;
                 float iconX = (bmp.Width - iconDestWidth) / 2;
@@ -148,12 +121,60 @@ public class QRCode : AbstractQRCode, IDisposable
     }
 
     /// <summary>
+    /// Creates a GraphicsPath containing rectangles for all dark modules in the QR code.
+    /// Uses Run-Length Encoding (RLE) to combine adjoining dark modules in each row into single rectangles.
+    /// </summary>
+    /// <param name="pixelsPerModule">The number of pixels per module.</param>
+    /// <param name="offset">The offset to apply for quiet zones.</param>
+    /// <param name="drawQuietZones">Whether quiet zones are being drawn.</param>
+    /// <returns>A GraphicsPath containing all dark module rectangles.</returns>
+    private GraphicsPath CreatePathFromModules(int pixelsPerModule, int offset, bool drawQuietZones)
+    {
+        var path = new GraphicsPath();
+        var matrix = QrCodeData.ModuleMatrix;
+        var size = matrix.Count;
+        var startIdx = drawQuietZones ? 0 : 4;
+        var endIdx = drawQuietZones ? size : size - 4;
+
+        for (int y = startIdx; y < endIdx; y++)
+        {
+            int x = startIdx;
+            while (x < endIdx)
+            {
+                // Skip light modules
+                if (!matrix[y][x])
+                {
+                    x++;
+                    continue;
+                }
+
+                // Found a dark module - find the run length
+                int startX = x;
+                while (x < endIdx && matrix[y][x])
+                {
+                    x++;
+                }
+
+                // Create a single rectangle for the entire run of dark modules
+                var rectX = startX * pixelsPerModule - offset;
+                var rectY = y * pixelsPerModule - offset;
+                var rectWidth = (x - startX) * pixelsPerModule;
+                var rectHeight = pixelsPerModule;
+
+                path.AddRectangle(new Rectangle(rectX, rectY, rectWidth, rectHeight));
+            }
+        }
+
+        return path;
+    }
+
+    /// <summary>
     /// Creates a rounded rectangle path for drawing.
     /// </summary>
     /// <param name="rect">The rectangle for which to create the rounded path.</param>
     /// <param name="cornerRadius">The radius of the corners.</param>
     /// <returns>Returns the rounded rectangle path.</returns>
-    internal GraphicsPath CreateRoundedRectanglePath(RectangleF rect, int cornerRadius)
+    internal static GraphicsPath CreateRoundedRectanglePath(RectangleF rect, int cornerRadius)
     {
         var roundedRect = new GraphicsPath();
         roundedRect.AddArc(rect.X, rect.Y, cornerRadius * 2, cornerRadius * 2, 180, 90);
@@ -169,12 +190,12 @@ public class QRCode : AbstractQRCode, IDisposable
     }
 }
 
-#if NET6_0_OR_GREATER
-[System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
 /// <summary>
 /// Provides static methods for creating bitmap QR codes.
 /// </summary>
+#if NET6_0_OR_GREATER
+[System.Runtime.Versioning.SupportedOSPlatform("windows")]
+#endif
 public static class QRCodeHelper
 {
     /// <summary>

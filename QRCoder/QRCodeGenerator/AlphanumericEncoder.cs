@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
 namespace QRCoder;
 
 public partial class QRCodeGenerator
@@ -9,40 +5,46 @@ public partial class QRCodeGenerator
     /// <summary>
     /// Encodes alphanumeric characters (<c>0–9</c>, <c>A–Z</c> (uppercase), space, <c>$</c>, <c>%</c>, <c>*</c>, <c>+</c>, <c>-</c>, period, <c>/</c>, colon) into a binary format suitable for QR codes.
     /// </summary>
-    private static class AlphanumericEncoder
+    internal static class AlphanumericEncoder
     {
-        private static readonly char[] _alphanumEncTable = { ' ', '$', '%', '*', '+', '-', '.', '/', ':' };
-
-        /// <summary>
-        /// A dictionary mapping alphanumeric characters to their respective positions used in QR code encoding.
-        /// This includes digits 0-9, uppercase letters A-Z, and some special characters.
-        /// </summary>
-        private static readonly Dictionary<char, int> _alphanumEncDict = CreateAlphanumEncDict(_alphanumEncTable);
-
-        /// <summary>
-        /// Creates a dictionary mapping alphanumeric characters to their respective positions used in QR code encoding.
-        /// This includes digits 0-9, uppercase letters A-Z, and some special characters.
-        /// </summary>
-        /// <returns>A dictionary mapping each supported alphanumeric character to its corresponding value.</returns>
-        private static Dictionary<char, int> CreateAlphanumEncDict(char[] alphanumEncTable)
-        {
-            var localAlphanumEncDict = new Dictionary<char, int>(45);
-            // Add 0-9
-            for (char c = '0'; c <= '9'; c++)
-                localAlphanumEncDict.Add(c, c - '0');
-            // Add uppercase alphabetic characters.
-            for (char c = 'A'; c <= 'Z'; c++)
-                localAlphanumEncDict.Add(c, localAlphanumEncDict.Count);
-            // Add special characters from a predefined table.
-            for (int i = 0; i < _alphanumEncTable.Length; i++)
-                localAlphanumEncDict.Add(alphanumEncTable[i], localAlphanumEncDict.Count);
-            return localAlphanumEncDict;
-        }
+#if HAS_SPAN
+        // With C# 7.3 and later, this byte array is inlined into the assembly's read-only data section, improving performance and reducing memory usage.
+        // See: https://devblogs.microsoft.com/dotnet/performance-improvements-in-net-core-3-0/
+        internal static ReadOnlySpan<byte> _map =>
+#else
+        internal static readonly byte[] _map =
+#endif
+        [
+            // 0..31
+            255, 255, 255, 255, 255, 255, 255, 255,
+            255, 255, 255, 255, 255, 255, 255, 255,
+            255, 255, 255, 255, 255, 255, 255, 255,
+            255, 255, 255, 255, 255, 255, 255, 255,
+            // 32..47  (space, ! " # $ % & ' ( ) * + , - . /)
+            36, 255, 255, 255, 37, 38, 255, 255, 255, 255, 39, 40, 255, 41, 42, 43,
+            // 48..57  (0..9)
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            // 58..64  (: ; < = > ? @)
+            44, 255, 255, 255, 255, 255, 255,
+            // 65..90  (A..Z)
+            10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35
+            // (we don't index > 90)
+        ];
 
         /// <summary>
         /// Checks if a character is present in the alphanumeric encoding table.
         /// </summary>
-        public static bool CanEncode(char c) => IsInRange(c, 'A', 'Z') || Array.IndexOf(_alphanumEncTable, c) >= 0;
+        public static bool CanEncode(char c) => c <= 90 && _map[c] != 255;
+
+        /// <summary>
+        /// Calculates the bit length required to encode alphanumeric text of a given length.
+        /// </summary>
+        /// <param name="textLength">The length of the alphanumeric text to be encoded.</param>
+        /// <returns>The number of bits required to encode the text.</returns>
+        public static int GetBitLength(int textLength)
+        {
+            return (textLength / 2) * 11 + (textLength & 1) * 6;
+        }
 
         /// <summary>
         /// Converts alphanumeric plain text into a binary format optimized for QR codes.
@@ -53,17 +55,29 @@ public partial class QRCodeGenerator
         /// <returns>A BitArray representing the binary data of the encoded alphanumeric text.</returns>
         public static BitArray GetBitArray(string plainText)
         {
-            // Calculate the length of the BitArray needed based on the number of character pairs.
-            var codeText = new BitArray((plainText.Length / 2) * 11 + (plainText.Length & 1) * 6);
-            var codeIndex = 0;
-            var index = 0;
-            var count = plainText.Length;
+            var codeText = new BitArray(GetBitLength(plainText.Length));
+            WriteToBitArray(plainText, 0, plainText.Length, codeText, 0);
+            return codeText;
+        }
 
+        /// <summary>
+        /// Writes a portion of alphanumeric plain text directly into an existing BitArray at the specified index.
+        /// Alphanumeric encoding packs characters into 11-bit groups for each pair of characters,
+        /// and 6 bits for a single remaining character if the total count is odd.
+        /// </summary>
+        /// <param name="plainText">The alphanumeric text to be encoded, which should only contain characters valid in QR alphanumeric mode.</param>
+        /// <param name="index">The starting index in the text to encode from.</param>
+        /// <param name="count">The number of characters to encode.</param>
+        /// <param name="codeText">The target BitArray to write to.</param>
+        /// <param name="codeIndex">The starting index in the BitArray where writing should begin.</param>
+        /// <returns>The next index in the BitArray after the last bit written.</returns>
+        public static int WriteToBitArray(string plainText, int index, int count, BitArray codeText, int codeIndex)
+        {
             // Process each pair of characters.
             while (count >= 2)
             {
                 // Convert each pair of characters to a number by looking them up in the alphanumeric dictionary and calculating.
-                var dec = _alphanumEncDict[plainText[index++]] * 45 + _alphanumEncDict[plainText[index++]];
+                var dec = _map[plainText[index++]] * 45 + _map[plainText[index++]];
                 // Convert the number to binary and store it in the BitArray.
                 codeIndex = DecToBin(dec, 11, codeText, codeIndex);
                 count -= 2;
@@ -72,10 +86,10 @@ public partial class QRCodeGenerator
             // Handle the last character if the length is odd.
             if (count > 0)
             {
-                DecToBin(_alphanumEncDict[plainText[index]], 6, codeText, codeIndex);
+                codeIndex = DecToBin(_map[plainText[index]], 6, codeText, codeIndex);
             }
 
-            return codeText;
+            return codeIndex;
         }
     }
 }
